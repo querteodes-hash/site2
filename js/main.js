@@ -166,7 +166,7 @@ async function boot() {
   const enter = $('#loaderEnter');
   enter.hidden = false;
   gsap.from(enter.children, { y: 24, opacity: 0, stagger: 0.08, duration: 0.8, ease: 'power3.out' });
-  gsap.to('.loader__count, .loader__right', { opacity: 0.25, duration: 0.6 });
+  gsap.to('.loader__count, .loader__right', { opacity: 0, y: 20, duration: 0.6 });
   enter.querySelector('[data-enter="sound"]').focus({ preventScroll: true });
 
   $$('[data-enter]').forEach((b) => b.addEventListener('click', () => enterSite(b.dataset.enter === 'sound'), { once: true }));
@@ -578,7 +578,7 @@ function hexRain(on) {
 function typeVpnTerminal() {
   const el = $('#vpnTerm');
   const script = [
-    ['<span class="g">bbb@edge-01</span>:<span class="c">~</span>$ ', 'bbb-vpn connect --node fra-01'],
+    ['<span class="g">obscure@edge-01</span>:<span class="c">~</span>$ ', 'obscure connect --node fra-01'],
     ['<span class="m">›</span> ', 'resolving edge… <span class="g">ok</span>'],
     ['<span class="m">›</span> ', 'handshake: noise_ik · x25519 <span class="g">✓</span>'],
     ['<span class="m">›</span> ', 'tunnel <span class="y">wg0</span> up · mtu 1420'],

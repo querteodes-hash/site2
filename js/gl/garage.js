@@ -42,14 +42,17 @@ const floorShader = {
       return 0.5 - max(dot(q, s * 0.5), q.x);
     }
     void main() {
-      vec2 uv = vUv.xy / vUv.w;
       float dist = length(vW.xz);
+      vec3 r = vec3(0.0);
+    #ifndef NO_REFLECT
+      vec2 uv = vUv.xy / vUv.w;
       float blur = 0.0025 + dist * 0.0007;
-      vec3 r = texture2D(tDiffuse, uv).rgb * 0.2;
+      r = texture2D(tDiffuse, uv).rgb * 0.2;
       for (int i = 0; i < 8; i++) {
         float a = float(i) * 0.785 + h(vW.xz * 13.0) * 0.6;
         r += texture2D(tDiffuse, uv + vec2(cos(a), sin(a)) * blur).rgb * 0.1;
       }
+    #endif
       float fade = exp(-dist * dist / 22.0);
       float pool = exp(-dist * dist / 14.0);
       vec3 base = color * (0.35 + 1.4 * pool) + vec3(0.03, 0.03, 0.034) * pool;
@@ -245,7 +248,19 @@ export class GarageScene {
         clipBias: 0.003,
       });
     } else {
-      this.floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.MeshStandardMaterial({ color: 0x060607, roughness: 0.55, metalness: 0.2, envMapIntensity: 0.25 }));
+      // phones: same dark hex-tiled floor, without the extra reflection pass
+      this.floor = new THREE.Mesh(new THREE.PlaneGeometry(size, size), new THREE.ShaderMaterial({
+        defines: { NO_REFLECT: '' },
+        uniforms: {
+          color: { value: new THREE.Color(0x060608) },
+          tDiffuse: { value: null },
+          textureMatrix: { value: new THREE.Matrix4() },
+          uGlow: { value: 0 },
+          uTail: { value: 0 },
+        },
+        vertexShader: floorShader.vertexShader,
+        fragmentShader: floorShader.fragmentShader,
+      }));
     }
     this.floor.rotation.x = -Math.PI / 2;
     this.scene.add(this.floor);
@@ -334,8 +349,11 @@ export class GarageScene {
   resize(w, h) {
     this.camera.aspect = w / h;
     this.portrait = w / h < 0.9;
-    this.camera.fov = this.portrait ? 52 : 34;
+    // tall screens: narrower lens and no visible light ceiling (it would wash out the top half)
+    this.camera.fov = this.portrait ? 44 : 34;
     this.camera.updateProjectionMatrix();
+    this.hex.visible = !this.portrait;
+    this.bloom = this.portrait || this.mobile ? 0.3 : 0.5;
   }
 
   update(dt, t) {
@@ -357,7 +375,7 @@ export class GarageScene {
     const f = S(p - i, 0, 1);
     const k = K[i].map((v, j) => v + (K[i + 1][j] - v) * f);
     const az = k[0] + this.drag + this._m.x * 0.15;
-    const rad = k[1] * (this.portrait ? 1.35 : 1);
+    const rad = k[1] * (this.portrait ? 1.55 : 1);
     const cam = this.camera;
     cam.position.set(Math.cos(az) * rad, k[2] - this._m.y * 0.25, Math.sin(az) * rad);
 

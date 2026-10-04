@@ -120,7 +120,8 @@ export class Stage {
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer = renderer;
 
-    this.maxDpr = mobile ? 1.5 : 2;
+    this.maxDpr = 2;
+    this.minDpr = mobile ? 1 : 0.85;
     this.dpr = Math.min(window.devicePixelRatio || 1, this.maxDpr);
     // ?dpr=2 pins the render resolution (no adaptive downscaling) — handy for screenshots
     const forced = parseFloat(new URLSearchParams(location.search).get('dpr'));
@@ -162,7 +163,7 @@ export class Stage {
     // order matches scroll: hero/about/arsenal → vpn/works → garage → contact
     this.scenes = [this.money, this.tunnel, this.garage, this.money];
 
-    const opts = { type: THREE.HalfFloatType, samples: mobile ? 0 : 4 };
+    const opts = { type: THREE.HalfFloatType, samples: 4 };
     this.rtA = new THREE.WebGLRenderTarget(1, 1, opts);
     this.rtB = new THREE.WebGLRenderTarget(1, 1, opts);
     this.rtC = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
@@ -227,9 +228,9 @@ export class Stage {
     if (this._fpsT >= 0.5) {
       this.fps = this._fpsN / this._fpsT;
       this._fpsT = 0; this._fpsN = 0;
-      if (!this.fixedDpr && this.fps < 42 && this.dpr > 0.85) {
+      if (!this.fixedDpr && this.fps < 42 && this.dpr > this.minDpr) {
         this._lowFor++;
-        if (this._lowFor >= 3) { this.dpr = Math.max(0.85, this.dpr - 0.2); this._lowFor = 0; this.resize(); }
+        if (this._lowFor >= 3) { this.dpr = Math.max(this.minDpr, this.dpr - 0.2); this._lowFor = 0; this.resize(); }
       } else this._lowFor = 0;
     }
   }
