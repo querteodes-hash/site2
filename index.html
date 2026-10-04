@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BBB — code. break. build.</title>
+  <meta name="description" content="bbb — кодер, пентестер, full-stack разработчик и сетевик. Портфолио, арсенал и собственный VPN.">
+  <meta name="theme-color" content="#050506">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="BBB — code. break. build.">
+  <meta property="og:description" content="Кодер · пентестер · full-stack · сетевик. Сейчас поднимаю собственный VPN.">
+  <meta property="og:image" content="assets/img/og.jpg">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,500;1,600&family=JetBrains+Mono:wght@300;400;500;700&family=Manrope:wght@300;400;500;600;700&family=Unbounded:wght@300;400;600;800;900&display=swap">
+
+  <link rel="preload" href="assets/img/bills.jpg" as="image" crossorigin="anonymous">
+  <link rel="stylesheet" href="vendor/lenis/lenis.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three/three.module.js",
+        "three/addons/": "./vendor/three/addons/"
+      }
+    }
+  </script>
+</head>
+
+<body class="is-loading">
+  <a class="skip" href="#hero">К содержимому</a>
+
+  <!-- ============ PRELOADER ============ -->
+  <div class="loader" id="loader" role="status" aria-live="polite">
+    <div class="loader__slices" aria-hidden="true">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    </div>
+    <div class="loader__inner">
+      <div class="loader__top mono">
+        <span>BBB/OS <b>v26.10</b></span>
+        <span class="loader__sec"><i></i> secure boot</span>
+        <span id="loaderClock">--:--:--</span>
+      </div>
+
+      <pre class="loader__log mono" id="loaderLog" aria-hidden="true"></pre>
+
+      <div class="loader__logo" aria-hidden="true">
+        <svg viewBox="0 0 900 260" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <linearGradient id="lgGold" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#fff3d6"/>
+              <stop offset=".45" stop-color="#d6b26a"/>
+              <stop offset="1" stop-color="#6d5222"/>
+            </linearGradient>
+          </defs>
+          <text class="loader__stroke" x="50%" y="58%" text-anchor="middle" dominant-baseline="middle">bbb</text>
+          <text class="loader__fill" x="50%" y="58%" text-anchor="middle" dominant-baseline="middle">bbb</text>
+        </svg>
+      </div>
+
+      <div class="loader__bottom">
+        <div class="loader__count"><span id="loaderCount">000</span><sup>%</sup></div>
+        <div class="loader__right">
+          <div class="loader__task mono" id="loaderTask">initializing…</div>
+          <div class="loader__bar"><i id="loaderBar"></i></div>
+        </div>
+      </div>
+
+      <div class="loader__enter" id="loaderEnter" hidden>
+        <p class="loader__ready mono"><span class="ok">●</span> system ready</p>
+        <div class="loader__btns">
+          <button class="btn btn--gold" data-enter="sound" data-magnetic>
+            <span class="btn__label">Войти со звуком</span>
+            <svg class="btn__ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+          <button class="btn btn--ghost" data-enter="mute" data-magnetic><span class="btn__label">без звука</span></button>
+        </div>
+        <p class="loader__hint mono">🎧 лучше в наушниках · звук сначала будет «под водой» — скролль, чтобы всплыть</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ WEBGL ============ -->
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="noise" aria-hidden="true"></div>
+
+  <!-- transition shutter (menu jumps) -->
+  <div class="shutter" id="shutter" aria-hidden="true">
+    <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+    <span class="shutter__label mono" id="shutterLabel">/hero</span>
+  </div>
+
+  <!-- cursor -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <div class="cursor__ring"><span class="cursor__label" id="cursorLabel"></span></div>
+    <div class="cursor__dot"></div>
+  </div>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav" id="nav">
+    <a class="nav__logo" href="#hero" data-link aria-label="bbb — на главную">
+      <span class="nav__mark">bbb</span><span class="nav__dot">.</span>
+    </a>
+    <div class="nav__status glass glass--pill mono" title="Статус VPN">
+      <i class="pulse"></i><span>VPN</span><b id="navPing">23ms</b><span class="nav__sep">/</span><span id="navNode">FRA-01</span>
+    </div>
+    <div class="nav__right">
+      <button class="sound glass glass--pill" id="soundBtn" aria-label="Включить или выключить звук" aria-pressed="false" data-magnetic>
+        <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="sound__txt mono" id="soundTxt">sound off</span>
+      </button>
+      <button class="burger glass glass--pill" id="menuBtn" aria-expanded="false" aria-controls="menu" data-magnetic>
+        <span class="mono">menu</span><span class="burger__lines" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============ MENU ============ -->
+  <nav class="menu" id="menu" aria-hidden="true" aria-label="Навигация по разделам">
+    <div class="menu__bg"></div>
+    <div class="menu__inner">
+      <ol class="menu__list">
+        <li><a href="#hero" data-link><span class="mono">01</span><b data-scramble>Главная</b><em class="serif">start</em></a></li>
+        <li><a href="#about" data-link><span class="mono">02</span><b data-scramble>Кто я</b><em class="serif">about</em></a></li>
+        <li><a href="#arsenal" data-link><span class="mono">03</span><b data-scramble>Арсенал</b><em class="serif">skills</em></a></li>
+        <li><a href="#vpn" data-link><span class="mono">04</span><b data-scramble>BBB VPN</b><em class="serif">project</em></a></li>
+        <li><a href="#works" data-link><span class="mono">05</span><b data-scramble>Работы</b><em class="serif">works</em></a></li>
+        <li><a href="#garage" data-link><span class="mono">06</span><b data-scramble>Гараж</b><em class="serif" id="menuCar">M4 CSL</em></a></li>
+        <li><a href="#contact" data-link><span class="mono">07</span><b data-scramble>Связь</b><em class="serif">contact</em></a></li>
+      </ol>
+      <div class="menu__side mono">
+        <p>// shortcuts</p>
+        <p><kbd>`</kbd> терминал</p>
+        <p><kbd>space</kbd> газ в гараже</p>
+        <p><kbd>m</kbd> звук</p>
+        <p class="menu__egg">↑↑↓↓←→←→ B A</p>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ HUD ============ -->
+  <aside class="hud" aria-hidden="true">
+    <div class="hud__section mono"><span id="hudIdx">01</span><i></i><span id="hudName">HERO</span></div>
+    <div class="hud__rail"><i id="hudBar"></i></div>
+    <ul class="hud__dots" id="hudDots"></ul>
+    <div class="hud__burn mono"><span>$ burned</span><b id="burned">0</b></div>
+    <div class="hud__sys mono"><span id="hudTime">00:00:00</span><span id="hudFps">60 fps</span></div>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <main id="app">
+
+    <!-- 01 HERO -->
+    <section class="sec hero" id="hero" data-index="01" data-name="HERO">
+      <div class="sec__in hero__in">
+        <p class="hero__kicker mono">
+          <span>[ portfolio · 2026 ]</span>
+          <span>status: <b class="ok">shipping vpn</b></span>
+        </p>
+        <h1 class="hero__title" aria-label="BBB">
+          <span class="hero__letter" data-l="B">B</span><span class="hero__letter" data-l="B">B</span><span class="hero__letter" data-l="B">B</span>
+        </h1>
+        <p class="hero__sub serif"><em>code.</em> <em>break.</em> <em>build.</em></p>
+        <p class="hero__roles mono"><span class="hero__prompt">bbb@root:~$</span> <span id="role">coder</span><i class="caret"></i></p>
+      </div>
+      <div class="hero__bottom">
+        <p class="hero__lead">Пишу код, который работает. Нахожу уязвимости раньше, чем их найдут другие. Строю сети, которые не падают. <span class="hl">Сейчас поднимаю собственный VPN.</span></p>
+        <div class="hero__scroll mono" aria-hidden="true"><span>scroll to surface</span><i></i></div>
+      </div>
+      <div class="hero__click mono" aria-hidden="true">клик по купюре — поджечь</div>
+    </section>
+
+    <!-- 02 ABOUT -->
+    <section class="sec about" id="about" data-index="02" data-name="ABOUT">
+      <div class="sec__in about__grid">
+        <figure class="portrait glass" data-tilt>
+          <div class="portrait__img"><img src="assets/img/franklin.jpg" alt="Портрет Бенджамина Франклина с купюры $100" loading="lazy" decoding="async"></div>
+          <div class="portrait__rgb" aria-hidden="true"></div>
+          <div class="portrait__scan" aria-hidden="true"></div>
+          <span class="portrait__c tl"></span><span class="portrait__c tr"></span><span class="portrait__c bl"></span><span class="portrait__c br"></span>
+          <figcaption class="portrait__cap mono"><span>ID: FRANKLIN_B</span><span>$100 · SERIES 2013</span></figcaption>
+          <div class="portrait__badge mono">verified <i>✓</i></div>
+        </figure>
+
+        <div class="about__text">
+          <p class="eyebrow mono"><i></i>02 — кто я</p>
+          <h2 class="about__h">
+            <span class="line"><span data-reveal>IN CODE</span></span>
+            <span class="line"><span data-reveal><em class="serif">we</em> TRUST</span></span>
+          </h2>
+          <p class="lead" data-fade>Я — <b>bbb</b>. Full-stack разработчик, пентестер и сетевик в одном лице. Мне интересно, как всё устроено на самом низком уровне — от пакета в проводе до пикселя на экране.</p>
+          <p class="lead lead--dim" data-fade>Поэтому я не просто пишу продукты, а с первого коммита думаю о том, как их защитить. Строгий стек, чистая архитектура, параноидальная безопасность. <em class="serif">Деньги любят тишину — трафик тоже.</em></p>
+          <div class="stats">
+            <div class="stat glass" data-tilt><b><span data-count="5">0</span>+</b><span>лет в разработке</span></div>
+            <div class="stat glass" data-tilt><b><span data-count="40">0</span>+</b><span>проектов в проде</span></div>
+            <div class="stat glass" data-tilt><b><span data-count="120">0</span>+</b><span>найденных уязвимостей</span></div>
+            <div class="stat glass" data-tilt><b><span data-count="99.9" data-dec="1">0</span>%</b><span>аптайм инфраструктуры</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee__track">
+          <span>Python</span><i>✦</i><span>Go</span><i>✦</i><span>Rust</span><i>✦</i><span>TypeScript</span><i>✦</i><span>React</span><i>✦</i><span>Node.js</span><i>✦</i><span>Linux</span><i>✦</i><span>WireGuard</span><i>✦</i><span>Xray</span><i>✦</i><span>nmap</span><i>✦</i><span>Burp Suite</span><i>✦</i><span>Metasploit</span><i>✦</i><span>Docker</span><i>✦</i><span>Kubernetes</span><i>✦</i><span>MikroTik</span><i>✦</i><span>PostgreSQL</span><i>✦</i>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 ARSENAL -->
+    <section class="sec arsenal" id="arsenal" data-index="03" data-name="ARSENAL">
+      <div class="arsenal__pin">
+        <div class="arsenal__bgword" aria-hidden="true">ARSENAL</div>
+        <div class="arsenal__head">
+          <p class="eyebrow mono"><i></i>03 — арсенал</p>
+          <h2 class="h2">Четыре роли.<br><em class="serif">Один человек.</em></h2>
+        </div>
+
+        <div class="carousel" id="carousel">
+          <div class="carousel__ring" id="carouselRing">
+            <article class="role glass" data-tilt>
+              <header class="role__top"><span class="mono">01 / 04</span>
+                <svg class="role__ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M17 14 7 24l10 10M31 14l10 10-10 10M27 9 21 39"/></svg>
+              </header>
+              <h3 class="role__title">CODER</h3>
+              <p class="role__serif serif"><em>clean. fast. typed.</em></p>
+              <p class="role__desc">Пишу на Python, Go, Rust и TypeScript. Высоконагруженные сервисы, CLI-утилиты, алгоритмы и автоматизация всего, что повторяется дважды.</p>
+              <ul class="chips mono"><li>Python</li><li>Go</li><li>Rust</li><li>TypeScript</li><li>C</li><li>Bash</li></ul>
+              <div class="role__meter"><span class="mono">level</span><i style="--v:.92"></i></div>
+            </article>
+
+            <article class="role glass" data-tilt>
+              <header class="role__top"><span class="mono">02 / 04</span>
+                <svg class="role__ico" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 6 9 12v11c0 9 6.5 16 15 19 8.5-3 15-10 15-19V12L24 6z"/><path d="m18 24 4 4 8-9"/></svg>
+              </header>
+              <h3 class="role__title">PENTESTER</h3>
+              <p class="role__serif serif"><em>find it before they do.</em></p>
+              <p class="role__desc">Авторизованное тестирование безопасности веба, сетей и инфраструктуры — строго по договору и в рамках scope. Результат — понятный отчёт и план исправлений.</p>
+              <ul class="chips mono"><li>Burp Suite</li><li>nmap</li><li>OWASP</li><li>Wireshark</li><li>ffuf</li><li>Reporting</li></ul>
+              <div class="role__meter"><span class="mono">level</span><i style="--v:.88"></i></div>
+            </article>
+
+            <article class="role glass" data-tilt>
+              <header class="role__top"><span class="mono">03 / 04</span>
+                <svg class="role__ico" viewBox="0 0 48 48" aria-hidden="true"><rect x="6" y="9" width="36" height="24" rx="3"/><path d="M17 41h14M24 33v8M12 16h10M12 22h16"/></svg>
+              </header>
+              <h3 class="role__title">FULL-STACK</h3>
+              <p class="role__serif serif"><em>from pixel to packet.</em></p>
+              <p class="role__desc">Интерфейсы на React и Next.js, бэкенд на Node и Go, базы, очереди, CI/CD. Довожу продукт от идеи до продакшена и мониторинга.</p>
+              <ul class="chips mono"><li>React</li><li>Next.js</li><li>Node.js</li><li>PostgreSQL</li><li>Redis</li><li>Docker</li></ul>
+              <div class="role__meter"><span class="mono">level</span><i style="--v:.9"></i></div>
+            </article>
+
+            <article class="role glass" data-tilt>
+              <header class="role__top"><span class="mono">04 / 04</span>
+                <svg class="role__ico" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="10" r="4"/><circle cx="10" cy="36" r="4"/><circle cx="38" cy="36" r="4"/><circle cx="24" cy="26" r="3"/><path d="M24 14v9M21.5 28 13 33.5M26.5 28 35 33.5M14 36h20"/></svg>
+              </header>
+              <h3 class="role__title">NETWORK</h3>
+              <p class="role__serif serif"><em>zero packet loss.</em></p>
+              <p class="role__desc">Проектирую и поднимаю сети: маршрутизация, VPN, VLAN, firewall. Linux-серверы, MikroTik, отказоустойчивые туннели между площадками.</p>
+              <ul class="chips mono"><li>WireGuard</li><li>MikroTik</li><li>BGP/OSPF</li><li>VLAN</li><li>nftables</li><li>Linux</li></ul>
+              <div class="role__meter"><span class="mono">level</span><i style="--v:.94"></i></div>
+            </article>
+          </div>
+        </div>
+
+        <div class="arsenal__foot mono">
+          <span><b id="roleIdx">01</b> / 04</span>
+          <span class="arsenal__line"><i id="roleBar"></i></span>
+          <span>scroll ↓</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 VPN -->
+    <section class="sec vpn" id="vpn" data-index="04" data-name="BBB VPN">
+      <div class="vpn__pin">
+        <div class="vpn__tunnel">
+          <p class="eyebrow mono"><i></i>04 — текущий проект</p>
+          <h2 class="vpn__big" aria-label="Encrypted"><span data-scramble-big>ENCRYPTED</span></h2>
+          <p class="vpn__tag serif"><em>твой трафик — только твой.</em></p>
+          <p class="vpn__ciphers mono">chacha20-poly1305 · curve25519 · blake2s · noise ik</p>
+          <div class="hexrain mono" id="hexrain" aria-hidden="true"></div>
+        </div>
+
+        <div class="vpn__panel">
+          <div class="vpn__info">
+            <p class="eyebrow mono"><i></i>project // in production</p>
+            <h2 class="vpn__h">BBB<span>VPN</span></h2>
+            <p class="vpn__status mono"><i class="pulse"></i> online · beta</p>
+            <p class="lead">Собственный VPN-сервис с нуля: от серверной инфраструктуры до клиента. Быстрый, стабильный, без логов. Протоколы, ноды, мониторинг и панель управления — всё своё.</p>
+            <ul class="features">
+              <li><i>01</i>WireGuard — современная криптография и минимальные задержки</li>
+              <li><i>02</i>No-logs: нечего хранить — нечего отдавать</li>
+              <li><i>03</i>Kill switch и split tunneling</li>
+              <li><i>04</i>Ноды в Европе и Азии, автовыбор ближайшей</li>
+              <li><i>05</i>Telegram-бот и панель для управления подпиской</li>
+            </ul>
+            <div class="vpn__cta">
+              <a class="btn btn--cyan" href="#contact" data-link data-magnetic><span class="btn__label">Получить доступ</span><span class="btn__arrow">→</span></a>
+              <span class="mono vpn__note">ранний доступ · бета</span>
+            </div>
+          </div>
+
+          <div class="vpn__side">
+            <div class="term glass">
+              <div class="term__bar"><i></i><i></i><i></i><span class="mono">bbb@edge-01: ~</span></div>
+              <pre class="term__body mono" id="vpnTerm" aria-label="Пример подключения к VPN"></pre>
+            </div>
+            <ul class="nodes glass mono" id="nodes" aria-label="Список нод">
+              <li data-node="FRA-01"><span>FRA-01</span><span>Frankfurt</span><b>23ms</b></li>
+              <li data-node="AMS-01"><span>AMS-01</span><span>Amsterdam</span><b>27ms</b></li>
+              <li data-node="HEL-01"><span>HEL-01</span><span>Helsinki</span><b>19ms</b></li>
+              <li data-node="STO-01"><span>STO-01</span><span>Stockholm</span><b>25ms</b></li>
+              <li data-node="WAW-01"><span>WAW-01</span><span>Warsaw</span><b>31ms</b></li>
+              <li data-node="IST-01"><span>IST-01</span><span>Istanbul</span><b>44ms</b></li>
+              <li data-node="TYO-01"><span>TYO-01</span><span>Tokyo</span><b>142ms</b></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 WORKS -->
+    <section class="sec works" id="works" data-index="05" data-name="WORKS">
+      <div class="works__pin">
+        <div class="works__head">
+          <p class="eyebrow mono"><i></i>05 — работы</p>
+          <h2 class="h2">Selected <em class="serif">works</em></h2>
+        </div>
+        <div class="works__track" id="worksTrack">
+          <article class="work glass" data-tilt>
+            <div class="work__visual work__visual--vpn" aria-hidden="true"><span class="mono">wg0: up</span></div>
+            <div class="work__meta">
+              <span class="mono work__num">01</span>
+              <h3>BBB VPN</h3>
+              <p>VPN-сервис: ноды, оркестрация, биллинг и Telegram-бот.</p>
+              <ul class="chips mono"><li>Go</li><li>WireGuard</li><li>Ansible</li></ul>
+            </div>
+          </article>
+          <article class="work glass" data-tilt>
+            <div class="work__visual work__visual--recon" aria-hidden="true"><span class="mono">scope.txt → report.pdf</span></div>
+            <div class="work__meta">
+              <span class="mono work__num">02</span>
+              <h3>Audit Pipeline</h3>
+              <p>Автоматизация рутины авторизованного аудита: инвентаризация, проверки, отчёт за минуты.</p>
+              <ul class="chips mono"><li>Python</li><li>Go</li><li>Docker</li></ul>
+            </div>
+          </article>
+          <article class="work glass" data-tilt>
+            <div class="work__visual work__visual--watch" aria-hidden="true"><span class="mono">uptime 99.98%</span></div>
+            <div class="work__meta">
+              <span class="mono work__num">03</span>
+              <h3>NetWatch</h3>
+              <p>Мониторинг сети и серверов в реальном времени с алертами в Telegram.</p>
+              <ul class="chips mono"><li>Prometheus</li><li>Grafana</li><li>SNMP</li></ul>
+            </div>
+          </article>
+          <article class="work glass" data-tilt>
+            <div class="work__visual work__visual--market" aria-hidden="true"><span class="mono">200 OK</span></div>
+            <div class="work__meta">
+              <span class="mono work__num">04</span>
+              <h3>Vault Market</h3>
+              <p>Full-stack маркетплейс: платежи, роли, админка, realtime-уведомления.</p>
+              <ul class="chips mono"><li>Next.js</li><li>NestJS</li><li>PostgreSQL</li></ul>
+            </div>
+          </article>
+          <article class="work glass" data-tilt>
+            <div class="work__visual work__visual--lab" aria-hidden="true"><span class="mono">vlan 10 · 20 · 30</span></div>
+            <div class="work__meta">
+              <span class="mono work__num">05</span>
+              <h3>Homelab</h3>
+              <p>Домашний дата-центр: виртуализация, сегментация сети, бэкапы и мониторинг.</p>
+              <ul class="chips mono"><li>Proxmox</li><li>MikroTik</li><li>ZFS</li></ul>
+            </div>
+          </article>
+          <article class="work glass" data-tilt>
+            <div class="work__visual work__visual--ctf" aria-hidden="true"><span class="mono">flag{…}</span></div>
+            <div class="work__meta">
+              <span class="mono work__num">06</span>
+              <h3>CTF Writeups</h3>
+              <p>Разборы учебных задач и лабораторий: web, криптография, форензика.</p>
+              <ul class="chips mono"><li>HTB</li><li>TryHackMe</li><li>PortSwigger</li></ul>
+            </div>
+          </article>
+          <div class="works__end" aria-hidden="true"><span class="serif"><em>to be continued…</em></span></div>
+        </div>
+        <div class="works__progress"><i id="worksBar"></i></div>
+      </div>
+    </section>
+
+    <!-- 06 GARAGE -->
+    <section class="sec garage" id="garage" data-index="06" data-name="GARAGE">
+      <div class="garage__pin">
+        <div class="garage__title">
+          <p class="eyebrow mono"><i></i>06 — гараж</p>
+          <h2 class="garage__h"><span class="mstripes" aria-hidden="true"><i></i><i></i><i></i></span><span id="carTitle">M4</span> <em class="serif" id="carTitleEm">CSL</em></h2>
+          <p class="garage__sub mono" id="carSub">G82 · S58B30T0 · 3.0 I6 BITURBO · CSL</p>
+          <p class="garage__quote serif"><em id="carQuote">Тот же принцип, что и в коде: мощность под контролем.</em></p>
+        </div>
+
+        <div class="garage__specs" id="specs">
+          <div class="spec"><b data-count="550">0</b><span>л.с.</span></div>
+          <div class="spec"><b data-count="650">0</b><span>Н·м</span></div>
+          <div class="spec"><b data-count="3.7" data-dec="1">0</b><span>с 0–100</span></div>
+          <div class="spec"><b data-count="307">0</b><span>км/ч</span></div>
+        </div>
+
+        <div class="dash glass" id="dash">
+          <div class="tacho" aria-hidden="true">
+            <svg viewBox="0 0 200 200" class="tacho__svg">
+              <circle class="tacho__track" cx="100" cy="100" r="84"/>
+              <circle class="tacho__red" cx="100" cy="100" r="84"/>
+              <circle class="tacho__val" id="tachoVal" cx="100" cy="100" r="84"/>
+              <g id="tachoTicks"></g>
+              <line class="tacho__needle" id="tachoNeedle" x1="100" y1="100" x2="100" y2="28"/>
+              <circle class="tacho__hub" cx="100" cy="100" r="6"/>
+            </svg>
+            <div class="tacho__read mono"><b id="rpmVal">0</b><span>rpm ×1</span></div>
+            <div class="tacho__gear">N</div>
+          </div>
+          <div class="dash__ctrl">
+            <button class="start" id="startBtn" aria-pressed="false" data-cursor="start">
+              <span class="start__ring"></span>
+              <span class="mono">engine</span><b>START</b><span class="mono">stop</span>
+            </button>
+            <button class="rev glass glass--pill mono" id="revBtn" data-cursor="hold" disabled>hold to rev <kbd>space</kbd></button>
+          </div>
+          <div class="paints" role="radiogroup" aria-label="Цвет кузова">
+            <span class="paints__list" id="paints"></span>
+            <span class="paints__name mono" id="paintName"></span>
+          </div>
+        </div>
+
+        <div class="garage__hint mono" aria-hidden="true"><i>⟲</i> drag — вращать</div>
+      </div>
+    </section>
+
+    <!-- 07 CONTACT -->
+    <section class="sec contact" id="contact" data-index="07" data-name="CONTACT">
+      <div class="sec__in contact__in">
+        <p class="eyebrow mono"><i></i>07 — связь</p>
+        <h2 class="contact__h">
+          <span class="line"><span data-reveal>LET'S</span></span>
+          <span class="line"><span data-reveal><em class="serif">build</em> SOMETHING</span></span>
+          <span class="line"><span data-reveal class="gold">SOLID.</span></span>
+        </h2>
+        <p class="lead contact__lead" data-fade>Проект, аудит безопасности, сеть под ключ или доступ к BBB VPN — пиши, отвечаю быстро.</p>
+        <div class="contact__grid">
+          <a class="clink glass" href="https://t.me/" target="_blank" rel="noopener" data-tilt data-magnetic>
+            <span class="mono">telegram</span><b>@bbb</b><i>↗</i>
+          </a>
+          <a class="clink glass" href="https://github.com/" target="_blank" rel="noopener" data-tilt data-magnetic>
+            <span class="mono">github</span><b>/bbb</b><i>↗</i>
+          </a>
+          <button class="clink glass" type="button" id="copyMail" data-mail="hello@bbb.dev" data-tilt data-magnetic>
+            <span class="mono">email</span><b>hello@bbb.dev</b><i>⧉</i>
+          </button>
+        </div>
+      </div>
+      <footer class="foot mono">
+        <span>© 2026 bbb</span>
+        <span>ни один бакс не пострадал — все сгорели цифрово</span>
+        <span id="carCredit" hidden></span>
+        <a href="#hero" data-link>наверх ↑</a>
+      </footer>
+    </section>
+  </main>
+
+  <!-- terminal easter egg -->
+  <button class="console-btn glass glass--pill mono" id="consoleBtn" aria-controls="console">&gt;_ terminal</button>
+  <div class="console glass" id="console" role="dialog" aria-label="Терминал" aria-hidden="true">
+    <div class="console__bar mono"><span><i></i><i></i><i></i></span>bbb@portfolio: ~<button id="consoleClose" aria-label="Закрыть">×</button></div>
+    <div class="console__out mono" id="consoleOut"></div>
+    <form class="console__in mono" id="consoleForm" autocomplete="off">
+      <label for="consoleInput">$</label><input id="consoleInput" spellcheck="false" autocapitalize="off" placeholder="help">
+    </form>
+  </div>
+
+  <div class="toast mono" id="toast" role="status"></div>
+
+  <audio id="track" src="assets/audio/addiction.mp3" preload="auto" loop></audio>
+
+  <script src="vendor/gsap/gsap.min.js"></script>
+  <script src="vendor/gsap/ScrollTrigger.min.js"></script>
+  <script src="vendor/lenis/lenis.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
