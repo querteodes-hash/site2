@@ -404,7 +404,10 @@ export class MoneyScene {
     let burned = 0;
     let manualDirty = false;
     const camZ = cam.position.z, camY = cam.position.y;
-    const wind = THREE.MathUtils.clamp(this.scrollVel * 0.0035, -2.5, 2.5);
+    // gentle, eased updraft from scrolling (raw scroll speed is far too spiky to use directly)
+    const windT = THREE.MathUtils.clamp(this.scrollVel * 0.0008, -0.9, 0.9);
+    this._wind = (this._wind || 0) + (windT - (this._wind || 0)) * (1 - Math.exp(-dt * 2.5));
+    const wind = this._wind;
     this.rainT = Math.max(0, (this.rainT || 0) - dt);
     const fall = this.rainT > 0 ? 4 : 1;
     const mx = this._mouseS.x, my = this._mouseS.y;
@@ -424,7 +427,7 @@ export class MoneyScene {
       pv.copy(bl.pos).project(cam);
       const dx = pv.x - mx, dy = pv.y - my;
       const d2 = dx * dx + dy * dy;
-      if (pv.z < 1 && d2 < 0.03) {
+      if (this.mouseActive && pv.z < 1 && d2 < 0.03) {
         const f = (0.03 - d2) * 40 * dt;
         bl.pos.x += dx * f * 4;
         bl.pos.y += dy * f * 3;
