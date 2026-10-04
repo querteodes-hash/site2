@@ -309,6 +309,14 @@ function setupScroll() {
     S.velocity = e.velocity;
     ScrollTrigger.update();
   });
+  // nav/HUD scrims once we're past the hero (native listener: works for touch scrolling too)
+  let scrolled = false;
+  const onScroll = () => {
+    const past = scrollY > innerHeight * 0.6;
+    if (past !== scrolled) { scrolled = past; document.body.classList.toggle('is-scrolled', past); }
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
   gsap.ticker.add((t) => lenis.raf(t * 1000));
   gsap.ticker.lagSmoothing(0);
 }
@@ -495,9 +503,9 @@ function setupSections() {
     scrollTrigger: { trigger: '#contact', start: 'top bottom', end: 'top 20%', scrub: true },
   });
   revealLines('#contact');
-  gsap.from('.clink', {
-    rotationY: -70, x: -40, opacity: 0, transformOrigin: '0% 50%', duration: 1.2, stagger: 0.12, ease: 'power3.out',
-    scrollTrigger: { trigger: '.contact__grid', start: 'top 90%' },
+  gsap.fromTo('.clink', { y: 60, opacity: 0 }, {
+    y: 0, opacity: 1, duration: 1, stagger: 0.1, ease: 'power3.out', clearProps: 'transform',
+    scrollTrigger: { trigger: '.contact__grid', start: 'top 98%', once: true },
   });
 
   // --- HUD
