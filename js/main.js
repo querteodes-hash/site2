@@ -378,7 +378,7 @@ function setupSections() {
   let mqX = 0;
   gsap.ticker.add(() => {
     const w = mq.scrollWidth / 2;
-    mqX -= 0.6 + Math.min(14, Math.abs(S.velocity) * 0.35);
+    mqX -= 0.6 + Math.min(10, Math.abs(G.vel) * 0.004);
     if (mqX <= -w) mqX += w;
     mq.style.transform = `translate3d(${mqX}px,0,0)`;
   });
@@ -838,9 +838,23 @@ $('#consoleClose').addEventListener('click', () => term.toggle(false));
 // ---------------------------------------------------------------- frame loop
 const cursor = new Cursor($('#cursor'), $('#cursorLabel'));
 const mouse = new THREE.Vector2();
+let mouseActive = false;
+// only a real mouse steers the 3D cameras; a finger scrolling the page must not
 addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'mouse') return;
+  mouseActive = true;
   mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
 }, { passive: true });
+
+// scroll-driven GL values are eased so jerky (touch) scrolling turns into smooth motion
+const G = { moneyP: 0, contactP: 0, vpnP: 0, worksP: 0, garageP: 0, vel: 0, lastY: scrollY };
+function easeScroll(dt) {
+  const k = 1 - Math.exp(-dt * 7);
+  for (const key of ['moneyP', 'contactP', 'vpnP', 'worksP', 'garageP']) G[key] += (S[key] - G[key]) * k;
+  const raw = dt > 0 ? (scrollY - G.lastY) / dt : 0;
+  G.lastY = scrollY;
+  G.vel += (THREE.MathUtils.clamp(raw, -6000, 6000) - G.vel) * (1 - Math.exp(-dt * 5));
+}
 
 let burnedShown = 0;
 let surfaced = false;
@@ -863,36 +877,38 @@ function frame() {
   } else if (depth > 0.5) surfaced = false;
 
 
+  easeScroll(dt);
   if (stage?.ready) {
     const s = S.mix1 + S.mix2 + S.mix3;
     const a = Math.min(2, Math.floor(s));
     const k = s - a;
     stage.setView(a, a + 1, k, a === 1 ? 1 : 0);
     stage.water = depth;
-    stage.velocity = S.velocity * 60;
+    stage.velocity = G.vel;
 
     const money = stage.money;
     money.mouse.copy(mouse);
+    money.mouseActive = mouseActive;
     money.water = depth;
     money.pulse = lv.pulse;
-    money.scrollVel = S.velocity * 60;
+    money.scrollVel = G.vel;
     if (s < 1.5) {
-      money.burn = S.moneyP * 1.25;
-      money.travel = S.moneyP;
+      money.burn = G.moneyP * 1.25;
+      money.travel = G.moneyP;
     } else {
-      money.burn = 1.3 * (1 - smooth(0.15, 0.85, S.contactP));
-      money.travel = 0.35 + S.contactP * 0.4;
+      money.burn = 1.3 * (1 - smooth(0.15, 0.85, G.contactP));
+      money.travel = 0.35 + G.contactP * 0.4;
     }
 
     const tun = stage.tunnel;
-    tun.p = S.vpnP;
-    tun.works = S.worksP;
+    tun.p = G.vpnP;
+    tun.works = G.worksP;
     tun.mouse.copy(mouse);
     tun.pulse = lv.pulse;
-    tun.speed = S.velocity * 60;
+    tun.speed = G.vel;
 
     const gar = stage.garage;
-    gar.p = S.garageP;
+    gar.p = G.garageP;
     gar.mouse.copy(mouse);
     gar.rpm = v8.rpm;
     gar.throttle = v8.load > 0.5 ? 1 : 0;

@@ -84,7 +84,7 @@ void main() {
   float w = uWater;
   uv += w * vec2(sin(uv.y * 16.0 + uTime * 1.4), cos(uv.x * 12.0 + uTime * 1.1)) * 0.0045;
   vec2 dir = uv - 0.5;
-  float ca = 0.0005 + min(abs(uVel), 3000.0) * 0.0000022 + w * 0.0025;
+  float ca = 0.0005 + min(abs(uVel), 3000.0) * 0.0000009 + w * 0.0025;
   vec3 col;
   col.r = texture2D(tC, uv + dir * ca * 2.0).r;
   col.g = texture2D(tC, uv).g;
