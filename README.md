@@ -50,7 +50,7 @@ Settings → Pages → *Deploy from a branch* → ветка `main`, папка 
 | Купюры и портрет | `assets/img/bills.jpg`, `assets/img/franklin.jpg` |
 | Цвета, шрифты, глассморфизм | `css/main.css` (переменные в `:root`) |
 
-Контакты (`@bbb`, `hello@bbb.dev`), цифры в статистике и описания проектов — **заглушки**, замени на свои.
+Telegram — @barbqwe. Email (`hello@bbb.dev`), GitHub, цифры в статистике и описания проектов — **заглушки**, замени на свои.
 
 Другая модель машины: положи `.glb` в `assets/models/` и опиши её в `js/car-config.js` (имена материалов краски, фар и стопов можно посмотреть через `npx @gltf-transform/cli inspect model.glb`). Большие модели лучше сжать:
 
