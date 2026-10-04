@@ -64,7 +64,7 @@ export class Terminal {
         break;
       case 'about': go('about'); break;
       case 'skills': case 'arsenal': go('arsenal'); break;
-      case 'vpn': go('vpn'); break;
+      case 'vpn': case 'obscure': go('vpn'); break;
       case 'works': case 'projects': go('works'); break;
       case 'garage': case 'm4': case 'bmw': go('garage'); break;
       case 'contact': case 'hire': go('contact'); break;
